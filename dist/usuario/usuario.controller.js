@@ -15,17 +15,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsuarioController = void 0;
 const common_1 = require("@nestjs/common");
 const usuario_repository_1 = require("./usuario.repository");
-const CriaUsuario_dto_1 = require("../dto/CriaUsuario.dto");
+const usuario_entity_1 = require("./usuario.entity");
+const uuid_1 = require("uuid");
+const CriaUsuario_dto_1 = require("./dto/CriaUsuario.dto");
+const ListaUsuario_dto_1 = require("./dto/ListaUsuario.dto");
+const AtualizaUsuario_dto_1 = require("./dto/AtualizaUsuario.dto");
 let UsuarioController = class UsuarioController {
     constructor(usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }
     async criaUsuarios(dadosDoUsuario) {
-        this.usuarioRepository.salvar(dadosDoUsuario);
-        return dadosDoUsuario;
+        const usuarioEntity = new usuario_entity_1.UsuarioEntity();
+        usuarioEntity.email = dadosDoUsuario.email;
+        usuarioEntity.senha = dadosDoUsuario.senha;
+        usuarioEntity.nome = dadosDoUsuario.nome;
+        usuarioEntity.id = (0, uuid_1.v4)();
+        this.usuarioRepository.salvar(usuarioEntity);
+        return {
+            usuario: new ListaUsuario_dto_1.ListaUsuarioDTO(usuarioEntity.id, usuarioEntity.nome),
+            mensagem: 'usuário criado com sucesso',
+        };
     }
     async listUsuarios() {
-        return this.usuarioRepository.listar();
+        const usuariosSalvos = await this.usuarioRepository.listar();
+        const usuariosLista = usuariosSalvos.map(usuario => new ListaUsuario_dto_1.ListaUsuarioDTO(usuario.id, usuario.nome));
+        return usuariosLista;
+    }
+    async atualizaUsuario(id, novosDados) {
+        const usuarioAtualizado = await this.usuarioRepository.atualiza(id, novosDados);
+        return {
+            usuario: usuarioAtualizado,
+            mensagem: 'usuário atualizado com sucesso',
+        };
+    }
+    async removeUsuario(id) {
+        const usuarioRemovido = await this.usuarioRepository.remove(id);
+        return {
+            usuario: usuarioRemovido,
+            mensagem: 'usuário removido com sucesso'
+        };
     }
 };
 exports.UsuarioController = UsuarioController;
@@ -42,6 +70,21 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UsuarioController.prototype, "listUsuarios", null);
+__decorate([
+    (0, common_1.Put)('/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, AtualizaUsuario_dto_1.AtualizaUsuarioDTO]),
+    __metadata("design:returntype", Promise)
+], UsuarioController.prototype, "atualizaUsuario", null);
+__decorate([
+    (0, common_1.Delete)('/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsuarioController.prototype, "removeUsuario", null);
 exports.UsuarioController = UsuarioController = __decorate([
     (0, common_1.Controller)('/usuarios'),
     __metadata("design:paramtypes", [usuario_repository_1.UsuarioRepository])
