@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CriaUsuarioDTO = void 0;
 const class_validator_1 = require("class-validator");
+const email_eh_unico_validator_1 = require("../usuario/validacao/email-eh-unico.validator");
 class CriaUsuarioDTO {
 }
 exports.CriaUsuarioDTO = CriaUsuarioDTO;
@@ -20,6 +21,7 @@ __decorate([
 ], CriaUsuarioDTO.prototype, "nome", void 0);
 __decorate([
     (0, class_validator_1.IsEmail)(undefined, { message: 'O e-mail informado é inválido!' }),
+    (0, email_eh_unico_validator_1.EmailEhUnico)({ message: 'Já existe um usuário com esse e-mail' }),
     __metadata("design:type", String)
 ], CriaUsuarioDTO.prototype, "email", void 0);
 __decorate([
